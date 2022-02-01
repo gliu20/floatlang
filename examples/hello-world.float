@@ -1,6 +1,6 @@
 @include std.float;
 
 int fn main () {
-    "Hello, world!" puts
+    puts("Hello, world!")
     return 0
 }
