@@ -1,0 +1,6 @@
+@include std.float;
+
+int fn main () {
+    "Hello, world!" puts
+    return 0
+}
