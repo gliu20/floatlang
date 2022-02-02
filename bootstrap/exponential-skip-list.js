@@ -111,6 +111,8 @@ const getAtIndex = (skipListHeader, index) => {
         console.log(`Info: looking at '${value}' at i: ${i} w/ dist: ${distFromDest}`);
 
         for (let j = 0; j < nodeLength - 2; j++) {
+            // calculate skip that goes the furthest from a node
+            // while still reaching destination
             const nodeFieldIndex = nodeLength - 1 - j;
             const skipOrder = nodeLength - 2 - j - 1;
             const skipAmount = SKIP_MULTIPLIER ** skipOrder;
@@ -133,13 +135,27 @@ const getAtIndex = (skipListHeader, index) => {
 const insertAfterIndex = (skipListHeader, index, node) => {
     const length = deref(skipListHeader);
     const lengthAfterInsert = length + 1;
+    const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(SKIP_MULTIPLIER));
+    
+    let prevNodePtr = NULL;
+
+    for (let i = depthAfterInsert - 1; i < 0; i--) {
+        const skipAmount = SKIP_MULTIPLIER ** i;
+        const backwardsOffset = index % skipAmount;
+        const backwardsIndex = index - backwardsOffset;
+
+        console.log(`Info: Analyzing level ${skipAmount}. Going backwards ${backwardsOffset} units`);
+        console.log(`Info: Currently at ${index} and going to ${backwardsIndex}`)
+        
+        prevNodePtr = getAtIndex(skipListHeader, backwardsIndex);
+
+        // now we have to update pointers on prev node
+        // skip order is i and that is the level of the
+        // pointer we have to update
+
+    }
 
     // update length after insert operation
     deref(skipListHeader, lengthAfterInsert);
-
-    const headPtr = deref(skipListHeader + 1);
-    const prevNodePtr = getAtIndex(skipListHeader, index);
-
-    // Math.floor(Math.log2(3))
 
 }
