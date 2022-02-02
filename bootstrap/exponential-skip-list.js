@@ -52,48 +52,77 @@ struct skipListHeader = {
 };
 
 struct skipListNode = {
-    length: 0, // size of node
+    order: 0, // allows calculating maxSkip etc.
     value: null,
-    nextPtrLvl1: NULL,
-    nextPtrLvl2: NULL,
-    ...
-    nextPtrLvln: NULL
-}
+    skipPointerListPtr: NULL
+};
+
+// basically a linked list
+struct skipListPointerListNode = {
+    skipPointerListPtr: NULL,
+    next: NULL,
+};
+
+
 */
 
 const testSkipList = [
     //// list header ////
     null,           // 0 segmentation fault 
     5,              // 1 length of list
-    3,              // 2 HEAD ptr
+    2,              // 2 skip multiplier
+    4,              // 3 HEAD ptr
 
     //// node 0 ////
-    5,              // 3 size
-    "0th ele",      // 4 value
-    8,              // 5 lvl1Ptr // node 1
-    11,             // 6 Lvl2Ptr // node 2
-    18,             // 7 Lvl3Ptr // node 4
+    2,              // 4 order
+    "0th ele",      // 5 value
+    7,              // 6 skipPointerListPtr
+
+    //// ptr node 0 ////
+    "4th ptr",      // 7 lvl3Ptr // node 4
+    9,              // 8 nextPtr 
+    "2nd ptr",      // 9 lvl2Ptr // node 2
+    11,             // 10 nextPtr
+    "1st ptr",      // 11 lvl1Ptr // node 1
+    NULL,           // 12 nextPtr
 
     //// node 1 ////
-    3,              // 8 size
-    "1st ele",      // 9 value
-    11,             // 10 lvl1Ptr // node 2
+    0,              // 13 order
+    "1st ele",      // 14 value
+    16,             // 15 skipPointerListPtr
+
+    //// ptr node 1 ////
+    "2nd ptr",      // 16 lvl1Ptr // node 2
+    NULL,           // 17 nextPtr
 
     //// node 2 ////
-    4,              // 11 size
-    "2nd ele",      // 12 value
-    15,             // 13 lvl1Ptr // node 3
-    18,             // 14 lvl2Ptr // node 4
+    1,              // 18 order
+    "2nd ele",      // 19 value
+    21,             // 20 skipPointerListPtr
+
+    //// ptr node 2 ////
+    "3rd ptr",      // 21 lvl1Ptr // node 3
+    23,             // 22 nextPtr
+    "4th ptr",      // 23 lvl2Ptr // node 4
+    NULL,           // 24 nextPtr
 
     //// node 3 ////
-    3,              // 15 size
-    "3rd ele",      // 16 value
-    18,             // 17 lvl1Ptr // node 4
+    0,              // 25 order
+    "3rd ele",      // 26 value
+    28,             // 27 skipPointerListPtr 
+
+    //// ptr node 3 ////
+    "4th ptr",      // 28 lvl1Ptr // node 4
+    NULL,           // 29 nextPtr
 
     //// node 4 ////
-    3,              // 18 size
-    "4th ele",      // 19 value
-    NULL,           // 20 lvl1Ptr // TAIL ptr
+    0,              // 30 order
+    "4th ele",      // 31 value
+    33,             // 32 skipPointerListPtr
+
+    //// ptr node 4 ////
+    NULL,           // 33 lvl1Ptr // TAIL ptr
+    NULL,           // 34 nextPtr
 ];
 
 memory = testSkipList;
@@ -189,6 +218,8 @@ const insertAfterIndex = (skipListHeader, index, node) => {
             // PROBLEM:
             // now all ptrs to prevNode have to be rewritten
             // increasing time complexity
+            // SOLUTION:
+            // re-architect skipPointers as a linkedList
         }
 
     }
