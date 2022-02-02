@@ -27,7 +27,7 @@ const free = (function () {
 })
 
 const deref = (index, value) => {
-    if (index === NULL || index === null)
+    if (index === NULL || index === null || index === '0')
         throw new Error ("Error: segmentation fault");
 
     // no value supplied; we're dereferencing
@@ -101,9 +101,9 @@ const testSkipList = [
     21,             // 20 skipPointerListPtr
 
     //// ptr node 2 ////
-    25,             // 21 lvl1Ptr // node 3
+    30,             // 21 lvl2Ptr // node 4
     23,             // 22 nextPtr
-    30,             // 23 lvl2Ptr // node 4
+    25,             // 23 lvl1Ptr // node 3
     NULL,           // 24 nextPtr
 
     //// node 3 ////
@@ -148,19 +148,24 @@ const getAtIndex = (headPtr, index) => {
 
     let currNodePtr = headPtr;
     
-    for (let i = 0; currNodePtr !== NULL; i++) {
+    for (let i = 0; currNodePtr !== NULL;) {
         
+        if (index === i) return currNodePtr;
+
         const maxSkipOrder = deref(currNodePtr);
         const numSkipsAvailable = maxSkipOrder + 1;
         const value = deref(currNodePtr + 1);
         const distFromDest = index - i;
 
+        if (distFromDest < 0) {
+            console.log("Error: Distance from index is negative")
+            return NULL;
+        }
+
         console.log(`Info: looking at '${value}' at i: ${i} w/ dist: ${distFromDest}`);
 
-
-        
-        const skipPtrListPtr = deref(currNodePtr + 2);
-        let prevSkipPtr = deref(skipPtrListPtr);
+        let skipPtrListPtr = deref(currNodePtr + 2);
+        let prevSkipPtr = skipPtrListPtr;
 
         for (let j = 0; j < numSkipsAvailable; j++) {
             // calculate skip that goes the furthest from a node
@@ -170,16 +175,28 @@ const getAtIndex = (headPtr, index) => {
 
             const nextNodePtr = deref(prevSkipPtr);
 
+            console.log(`Info: Trying skipAmount ${skipAmount}`)
+
             if (skipAmount <= distFromDest &&
                 nextNodePtr !== NULL) {
                     console.log(`Info: Skipping ${skipAmount} units forward`)
+
                     currNodePtr = nextNodePtr;
                     i += skipAmount;
+
+                    // once you skip, the ptrs of currNode
+                    // no longer apply
+                    break;
             }
 
-            if (index === i) return currNodePtr;
+            // move to next skipPtr
+            prevSkipPtr = deref(prevSkipPtr + 1);
         }
+
+        
     }
+
+    console.log("Warn: Node at index does not exist")
 
     return NULL;
 }
