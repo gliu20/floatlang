@@ -40,7 +40,6 @@ const deref = (index, value) => {
 
 //// EXPONENTIAL SKIP LIST ////
 const EXECUTION_CAP = 1000;
-const SKIP_MULTIPLIER = 2;
 
 /*
 // This is how the struct
@@ -207,14 +206,16 @@ const getAtIndex = (headPtr, index) => {
 
 const insertAfterIndex = (skipListHeader, index, node) => {
     const length = deref(skipListHeader);
+    const skipMultiplier = deref(skipListHeader + 1);
+
     const lengthAfterInsert = length + 1;
-    const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(SKIP_MULTIPLIER));
+    const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(skipMultiplier));
     
     const headPtr = getHead(skipListHeader);
     let prevNodePtr = headPtr;
 
     for (let i = depthAfterInsert - 1; i < 0; i--) {
-        const skipAmount = SKIP_MULTIPLIER ** i;
+        const skipAmount = skipMultiplier ** i;
         const backwardsOffset = index % skipAmount;
         const backwardsIndex = index - backwardsOffset;
 
@@ -226,32 +227,35 @@ const insertAfterIndex = (skipListHeader, index, node) => {
         // now we have to update pointers on prev node
         // skip order is i and that is the level of the
         // pointer we have to update
-        const nodeLength = deref(prevNodePtr);
-        const desiredNodeLength = i + 2 + 1;
+        const nodeSkipOrder = deref(prevNodePtr);
+        const desiredSkipOrder = i;
 
-        // this node is too small so we have to allocate a 
-        // new larger node and create pointers for it
-        if (nodeLength < desiredNodeLength) {
-            const newNodePtr = createNode(desiredNodeLength);
-            
-            for (let i = 1; i < nodeLength; i++) {
-                // copy each field from prevNode to newNodePtr
-                deref(newNodePtr + i, deref(prevNodePtr + i))
+        let skipPointerListPtr = deref(prevNodePtr + 2);
+
+        // this node needs to add a higher level instead of modifying pointers
+        if (nodeSkipOrder < desiredSkipOrder) {
+            if (desiredSkipOrder - nodeSkipOrder !== 1) {
+                console.log(`Error: desiredSkipOrder - nodeSkipOrder !== 1. Instead got ${desiredSkipOrder - nodeSkipOrder}`);
+                return NULL;
             }
+            const newPtrNode = malloc(2);
 
-            // free old node that we no longer need
-            free(prevNodePtr);
-    
-            // set prevNodePtr to something else
-            prevNodePtr = null;
+            deref(newPtrNode, NULL);                   // newPtrNode->value = NULL;
+            deref(newPtrNode + 1, skipPointerListPtr); // newPtrNode->next = skipPointerListPtr;
+            deref(prevNodePtr + 2, newPtrNode);        // prevNodePtr->skipPointerListPtr = newPtrNode;
 
-            // PROBLEM:
-            // now all ptrs to prevNode have to be rewritten
-            // increasing time complexity
-            // SOLUTION:
-            // re-architect skipPointers as a linkedList
+            skipPointerListPtr = newPtrNode;
         }
 
+        let candidatePtr = skipPointerListPtr;
+
+        // descend down skipPointerListPtr to pointer of desiredSkipOrder
+        for (let i = 0; i < nodeSkipOrder - desiredSkipOrder; i++) {
+            candidatePtr = deref(candidatePtr + 1);
+        }
+
+        // candidatePtr is calculated.. now need to update ptr to correct location
+        deref(candidatePtr, getAtIndex(prevNodePtr, ))
     }
 
     // update length after insert operation
