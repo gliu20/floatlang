@@ -79,11 +79,11 @@ const testSkipList = [
     7,              // 6 skipPointerListPtr
 
     //// ptr node 0 ////
-    "4th ptr",      // 7 lvl3Ptr // node 4
+    30,             // 7 lvl3Ptr // node 4
     9,              // 8 nextPtr 
-    "2nd ptr",      // 9 lvl2Ptr // node 2
+    18,             // 9 lvl2Ptr // node 2
     11,             // 10 nextPtr
-    "1st ptr",      // 11 lvl1Ptr // node 1
+    13,             // 11 lvl1Ptr // node 1
     NULL,           // 12 nextPtr
 
     //// node 1 ////
@@ -92,7 +92,7 @@ const testSkipList = [
     16,             // 15 skipPointerListPtr
 
     //// ptr node 1 ////
-    "2nd ptr",      // 16 lvl1Ptr // node 2
+    18,             // 16 lvl1Ptr // node 2
     NULL,           // 17 nextPtr
 
     //// node 2 ////
@@ -101,9 +101,9 @@ const testSkipList = [
     21,             // 20 skipPointerListPtr
 
     //// ptr node 2 ////
-    "3rd ptr",      // 21 lvl1Ptr // node 3
+    25,             // 21 lvl1Ptr // node 3
     23,             // 22 nextPtr
-    "4th ptr",      // 23 lvl2Ptr // node 4
+    30,             // 23 lvl2Ptr // node 4
     NULL,           // 24 nextPtr
 
     //// node 3 ////
@@ -112,7 +112,7 @@ const testSkipList = [
     28,             // 27 skipPointerListPtr 
 
     //// ptr node 3 ////
-    "4th ptr",      // 28 lvl1Ptr // node 4
+    30,             // 28 lvl1Ptr // node 4
     NULL,           // 29 nextPtr
 
     //// node 4 ////
