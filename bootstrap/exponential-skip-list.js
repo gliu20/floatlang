@@ -21,10 +21,15 @@ const free = (function () {
     console.log("Warn: Memory freeing is not implemented")
 })
 
-const deref = (index) => {
+const deref = (index, value) => {
     if (index === NULL || index === null)
         throw new Error ("Error: segmentation fault");
-    return memory[index];
+
+    // no value supplied; we're dereferencing
+    if (value === undefined) return memory[index];
+
+    // value is supplied; we want to set a value
+    memory[index] = value;
 }
 
 
@@ -61,30 +66,29 @@ const testSkipList = [
     5,              // 3 size
     "0th ele",      // 4 value
     8,              // 5 lvl1Ptr // node 1
-    12,             // 6 Lvl2Ptr // node 2
-    19,             // 7 Lvl3Ptr // node 4
+    11,             // 6 Lvl2Ptr // node 2
+    18,             // 7 Lvl3Ptr // node 4
 
     //// node 1 ////
-    4,              // 8 size
+    3,              // 8 size
     "1st ele",      // 9 value
-    12,             // 10 lvl1Ptr // node 2
-    16,             // 11 lvl2Ptr // node 3
+    11,             // 10 lvl1Ptr // node 2
 
     //// node 2 ////
-    4,              // 12 size
-    "2nd ele",      // 13 value
-    16,             // 14 lvl1Ptr // node 3
-    19,             // 15 lvl2Ptr // node 4
+    4,              // 11 size
+    "2nd ele",      // 12 value
+    15,             // 13 lvl1Ptr // node 3
+    18,             // 14 lvl2Ptr // node 4
 
     //// node 3 ////
-    3,              // 16 size
-    "3rd ele",      // 17 value
-    19,             // 18 lvl1Ptr // node 4
+    3,              // 15 size
+    "3rd ele",      // 16 value
+    18,             // 17 lvl1Ptr // node 4
 
     //// node 4 ////
-    3,              // 19 size
-    "4th ele",      // 20 value
-    NULL,           // 21 lvl1Ptr // TAIL ptr
+    3,              // 18 size
+    "4th ele",      // 19 value
+    NULL,           // 20 lvl1Ptr // TAIL ptr
 ];
 
 memory = testSkipList;
@@ -109,7 +113,7 @@ const getAtIndex = (skipListHeader, index) => {
         for (let j = 0; j < nodeLength - 2; j++) {
             const nodeFieldIndex = nodeLength - 1 - j;
             const skipOrder = nodeLength - 2 - j - 1;
-            const skipAmount = 2 ** skipOrder;
+            const skipAmount = SKIP_MULTIPLIER ** skipOrder;
             const nextPtr = deref(currPtr + nodeFieldIndex);
 
             if (skipAmount <= distFromDest &&
@@ -124,4 +128,18 @@ const getAtIndex = (skipListHeader, index) => {
     }
 
     return NULL;
+}
+
+const insertAfterIndex = (skipListHeader, index, node) => {
+    const length = deref(skipListHeader);
+    const lengthAfterInsert = length + 1;
+
+    // update length after insert operation
+    deref(skipListHeader, lengthAfterInsert);
+
+    const headPtr = deref(skipListHeader + 1);
+    const prevNodePtr = getAtIndex(skipListHeader, index);
+
+    // Math.floor(Math.log2(3))
+
 }
