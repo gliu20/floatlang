@@ -5,15 +5,20 @@ let memory = [];
 
 // bump allocator
 const malloc = (function () {
-    let memoryPointer = 1;
+    let memoryPointer = 50;
 
     return function (size) {
+        const allocatedPointer = memoryPointer;
+
         // clear memory before use
         for (let i = 0; i < size; i++) {
             memory[memoryPointer + i] = null;
         }
+
+        // bump pointer for internal use
+        memoryPointer += size;
         
-        return memoryPointer += size;
+        return allocatedPointer;
     }
 })();
 
@@ -100,6 +105,10 @@ const getHead = (skipListHeader) => {
     return headPtr;
 }
 
+const createNode = (length) => {
+
+}
+
 // returns pointer to skipListNode
 const getAtIndex = (headPtr, index) => {
 
@@ -139,7 +148,8 @@ const insertAfterIndex = (skipListHeader, index, node) => {
     const lengthAfterInsert = length + 1;
     const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(SKIP_MULTIPLIER));
     
-    let prevNodePtr = NULL;
+    const headPtr = getHead(skipListHeader);
+    let prevNodePtr = headPtr;
 
     for (let i = depthAfterInsert - 1; i < 0; i--) {
         const skipAmount = SKIP_MULTIPLIER ** i;
@@ -149,7 +159,7 @@ const insertAfterIndex = (skipListHeader, index, node) => {
         console.log(`Info: Analyzing level ${skipAmount}. Going backwards ${backwardsOffset} units`);
         console.log(`Info: Currently at ${index} and going to ${backwardsIndex}`)
         
-        prevNodePtr = getAtIndex(skipListHeader, backwardsIndex);
+        prevNodePtr = getAtIndex(prevNodePtr, backwardsIndex);
 
         // now we have to update pointers on prev node
         // skip order is i and that is the level of the
