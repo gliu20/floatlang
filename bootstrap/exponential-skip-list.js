@@ -167,6 +167,29 @@ const insertAfterIndex = (skipListHeader, index, node) => {
         // now we have to update pointers on prev node
         // skip order is i and that is the level of the
         // pointer we have to update
+        const nodeLength = deref(prevNodePtr);
+        const desiredNodeLength = i + 2 + 1;
+
+        // this node is too small so we have to allocate a 
+        // new larger node and create pointers for it
+        if (nodeLength < desiredNodeLength) {
+            const newNodePtr = createNode(desiredNodeLength);
+            
+            for (let i = 1; i < nodeLength; i++) {
+                // copy each field from prevNode to newNodePtr
+                deref(newNodePtr + i, deref(prevNodePtr + i))
+            }
+
+            // free old node that we no longer need
+            free(prevNodePtr);
+    
+            // set prevNodePtr to something else
+            prevNodePtr = null;
+
+            // PROBLEM:
+            // now all ptrs to prevNode have to be rewritten
+            // increasing time complexity
+        }
 
     }
 
