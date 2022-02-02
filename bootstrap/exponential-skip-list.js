@@ -129,46 +129,55 @@ memory = testSkipList;
 
 // returns pointer to first node in skipList
 const getHead = (skipListHeader) => {
-    const headPtr = deref(skipListHeader + 1);
+    const headPtr = deref(skipListHeader + 2);
 
     return headPtr;
 }
 
+/*
+// TODO remake this for new format
 const createNode = (length) => {
     const nodePtr = malloc(length);
 
     deref(nodePtr, length); // set size of node
     deref(nodePtr + 1, null); // set initial value of node to null
-}
+}*/
 
 // returns pointer to skipListNode
 const getAtIndex = (headPtr, index) => {
 
-    let currPtr = headPtr;
-    while (currPtr !== NULL) {
+    let currNodePtr = headPtr;
+    
+    for (let i = 0; currNodePtr !== NULL; i++) {
         
-        const nodeLength = deref(currPtr);
-        const value = deref(currPtr + 1);
+        const maxSkipOrder = deref(currNodePtr);
+        const numSkipsAvailable = maxSkipOrder + 1;
+        const value = deref(currNodePtr + 1);
         const distFromDest = index - i;
 
         console.log(`Info: looking at '${value}' at i: ${i} w/ dist: ${distFromDest}`);
 
-        for (let j = 0; j < nodeLength - 2; j++) {
+
+        
+        const skipPtrListPtr = deref(currNodePtr + 2);
+        let prevSkipPtr = deref(skipPtrListPtr);
+
+        for (let j = 0; j < numSkipsAvailable; j++) {
             // calculate skip that goes the furthest from a node
             // while still reaching destination
-            const nodeFieldIndex = nodeLength - 1 - j;
-            const skipOrder = nodeLength - 2 - j - 1;
+            const skipOrder = maxSkipOrder - j;
             const skipAmount = SKIP_MULTIPLIER ** skipOrder;
-            const nextPtr = deref(currPtr + nodeFieldIndex);
+
+            const nextNodePtr = deref(prevSkipPtr);
 
             if (skipAmount <= distFromDest &&
-                nextPtr !== NULL) {
+                nextNodePtr !== NULL) {
                     console.log(`Info: Skipping ${skipAmount} units forward`)
-                    currPtr = nextPtr;
+                    currNodePtr = nextNodePtr;
                     i += skipAmount;
             }
 
-            if (index === i) return currPtr;
+            if (index === i) return currNodePtr;
         }
     }
 
