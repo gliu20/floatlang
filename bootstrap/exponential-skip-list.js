@@ -1,6 +1,6 @@
 //// MEMORY ////
 
-const NULL = 0;
+const NULL = -100;
 let memory = [];
 
 // bump allocator
@@ -27,7 +27,7 @@ const free = (function () {
 })
 
 const deref = (index, value) => {
-    if (index === NULL || index === null || index === '0')
+    if (index === NULL || index === null || index <= 0)
         throw new Error ("Error: segmentation fault");
 
     // no value supplied; we're dereferencing
@@ -39,7 +39,7 @@ const deref = (index, value) => {
 
 
 //// EXPONENTIAL SKIP LIST ////
-
+const EXECUTION_CAP = 1000;
 const SKIP_MULTIPLIER = 2;
 
 /*
@@ -148,7 +148,7 @@ const getAtIndex = (headPtr, index) => {
 
     let currNodePtr = headPtr;
     
-    for (let i = 0; currNodePtr !== NULL;) {
+    for (let i = 0, execCap = 0; currNodePtr !== NULL && execCap++ < EXECUTION_CAP;) {
         
         if (index === i) return currNodePtr;
 
@@ -156,11 +156,6 @@ const getAtIndex = (headPtr, index) => {
         const numSkipsAvailable = maxSkipOrder + 1;
         const value = deref(currNodePtr + 1);
         const distFromDest = index - i;
-
-        if (distFromDest < 0) {
-            console.log("Error: Distance from index is negative")
-            return NULL;
-        }
 
         console.log(`Info: looking at '${value}' at i: ${i} w/ dist: ${distFromDest}`);
 
@@ -187,6 +182,15 @@ const getAtIndex = (headPtr, index) => {
                     // once you skip, the ptrs of currNode
                     // no longer apply
                     break;
+            }
+
+            // we should have breaked if index exists
+            // therefore node does exist or the data structure
+            // is malformed
+            if (skipOrder === 0) {
+                console.log("Warn: No valid path to node at index")
+                console.log("Warn: Node either does not exist or the list is malformed")
+                return NULL;
             }
 
             // move to next skipPtr
