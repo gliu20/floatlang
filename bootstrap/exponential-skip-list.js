@@ -106,7 +106,10 @@ const getHead = (skipListHeader) => {
 }
 
 const createNode = (length) => {
+    const nodePtr = malloc(length);
 
+    deref(nodePtr, length); // set size of node
+    deref(nodePtr + 1, null); // set initial value of node to null
 }
 
 // returns pointer to skipListNode
