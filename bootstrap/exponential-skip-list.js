@@ -93,16 +93,18 @@ const testSkipList = [
 
 memory = testSkipList;
 
-// returns pointer to skipListNode
-const getAtIndex = (skipListHeader, index) => {
-    const length = deref(skipListHeader);
+// returns pointer to first node in skipList
+const getHead = (skipListHeader) => {
     const headPtr = deref(skipListHeader + 1);
 
+    return headPtr;
+}
+
+// returns pointer to skipListNode
+const getAtIndex = (headPtr, index) => {
+
     let currPtr = headPtr;
-    for (let i = 0; i < length;) {
-        if (currPtr === NULL) {
-            return NULL;
-        }
+    while (currPtr !== NULL) {
         
         const nodeLength = deref(currPtr);
         const value = deref(currPtr + 1);
