@@ -17,7 +17,7 @@ const malloc = (function () {
 
         // bump pointer for internal use
         memoryPointer += size;
-        
+
         return allocatedPointer;
     }
 })();
@@ -28,7 +28,7 @@ const free = (function () {
 
 const deref = (index, value) => {
     if (index === NULL || index === null || index <= 0)
-        throw new Error ("Error: segmentation fault");
+        throw new Error("Error: segmentation fault");
 
     // no value supplied; we're dereferencing
     if (value === undefined) return memory[index];
@@ -162,9 +162,9 @@ const createNode = (length) => {
 const getAtIndex = (headPtr, index, skipMultiplier) => {
 
     let currNodePtr = headPtr;
-    
+
     for (let i = 0, execCap = 0; currNodePtr !== NULL && execCap++ < EXECUTION_CAP;) {
-        
+
         if (index === i) return currNodePtr;
 
         const maxSkipOrder = deref(currNodePtr);
@@ -189,14 +189,14 @@ const getAtIndex = (headPtr, index, skipMultiplier) => {
 
             if (skipAmount <= distFromDest &&
                 nextNodePtr !== NULL) {
-                    //console.log(`Debug: getAtIndex: Skipping ${skipAmount} units forward`)
+                //console.log(`Debug: getAtIndex: Skipping ${skipAmount} units forward`)
 
-                    currNodePtr = nextNodePtr;
-                    i += skipAmount;
+                currNodePtr = nextNodePtr;
+                i += skipAmount;
 
-                    // once you skip, the ptrs of currNode
-                    // no longer apply
-                    break;
+                // once you skip, the ptrs of currNode
+                // no longer apply
+                break;
             }
 
             // we should have breaked if index exists
@@ -212,7 +212,7 @@ const getAtIndex = (headPtr, index, skipMultiplier) => {
             prevSkipPtr = deref(prevSkipPtr + 1);
         }
 
-        
+
     }
 
     console.log(`Warn: Node at index ${index} does not exist`)
@@ -226,9 +226,64 @@ const insertAfterIndex = (skipListHeader, index, node) => {
 
     const lengthAfterInsert = length + 1;
     const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(skipMultiplier));
-    
+
     const headPtr = getHead(skipListHeader);
     const indexNodePtr = getAtIndex(headPtr, index, skipMultiplier);
+
+
+    const desiredSkipOrder = lengthAfterInsert - (index + 1);
+
+    let nodeSkipOrder = deref(node);
+    let skipPointerListPtr = deref(node + 2);
+    let currNodePtr = skipPointerListPtr;
+
+    // okay this should guarantee correct
+    // order of node
+    while (desiredSkipOrder !== (nodeSkipOrder = deref(node))) {
+        if (desiredSkipOrder > nodeSkipOrder) {
+            const newPtrNode = malloc(2);
+
+            deref(newPtrNode + 1, skipPointerListPtr);  // newPtrNode->next = skipPointerListPtr;
+            deref(node + 2, newPtrNode);                // node->skipPointerListPtr = newPtrNode;
+
+            skipPointerListPtr = newPtrNode;
+
+            // increment order of node
+            deref(node, nodeSkipOrder + 1);
+
+            // set currNodePtr
+            currNodePtr = newPtrNode;
+        }
+
+        if (desiredSkipOrder > 0 &&
+            desiredSkipOrder < nodeSkipOrder) {
+                // skipPointerListPtr = currNodePtr->next;
+                skipPointerListPtr = deref(currNodePtr + 1)
+
+                if (skipPointerListPtr === NULL)
+                    throw new Error("Error: found NULL when lowering order of node")
+
+                // remove currNodePtr
+                free(currNodePtr);
+
+                // decrement order of node
+                deref(node, nodeSkipOrder + 1);
+
+        }
+    }
+
+    // first update size of list based on skipOrder
+    // then update pointers
+    // special case for order 0 / 1
+    for (let i = desiredSkipOrder; i >= 0; i--) {
+        const desiredSkipAmount = skipMultiplier ** i;
+
+
+        // newPtrNode->value = ele that is desired skip ele away from node to be added;
+        deref(newPtrNode, getAtIndex(indexNodePtr, desiredSkipAmount + 1, skipMultiplier));
+
+        currNodePtr = deref(currNodePtr + 1) // currNodePtr = currNodePtr->next
+    }
 
     let prevNodePtr = headPtr;
     let prevNodeOffset = 0;
@@ -238,7 +293,7 @@ const insertAfterIndex = (skipListHeader, index, node) => {
         const backwardsOffset = index % skipAmount;
         const backwardsIndex = index - backwardsOffset;
 
-        
+
         prevNodePtr = getAtIndex(prevNodePtr, backwardsIndex - prevNodeOffset, skipMultiplier);
 
         console.log(`Debug: insertAfterIndex: Analyzing level ${skipAmount}. At node '${deref(prevNodePtr + 1)}`);
