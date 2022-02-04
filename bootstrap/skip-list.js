@@ -364,12 +364,12 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     // point to real head
     derefField(newBackrefs, struct__skipListBackrefs.pointers, realHead);
 
-    debugPrintLL(newBackrefs);
+    debugPrintSL(newBackrefs);
 
     return newBackrefs;
 }
 
-function debugPrintLL(skipListBackrefs, msg) {
+function debugPrintSL(skipListBackrefs, msg) {
     const order = derefField(skipListBackrefs, struct__skipListBackrefs.order);
     let output = `Info: ${msg || ""}LinkedList(${order}): `;
 
@@ -386,6 +386,35 @@ function debugPrintLL(skipListBackrefs, msg) {
     console.log(output);
 }
 
-fn__skipList__findBackrefsAtIndex(1,1)
+function debugPrintLL(headPtr, msg) {
+    let output = `Info: ${msg || ""}LinkedList: `;
 
+    let currNodePtr = headPtr;
+    while(currNodePtr !== NULL) {
+        const value = derefField(currNodePtr, struct__linkedListNode.value);
+
+        output += `${value} --> `;
+        currNodePtr = derefField(currNodePtr, struct__linkedListNode.next);
+    }
+    output += "NULL";
+    console.log(output);
+}
+
+function testLL () {
+    let bookends = malloc(2);
+
+    derefField(bookends, struct__linkedListBookends.headPtr, NULL);
+    derefField(bookends, struct__linkedListBookends.tailPtr, NULL);
+
+    for (let i = 10; i >= 0; i--) {
+        const newNode = malloc(2);
+
+        derefField(newNode, struct__linkedListNode.value, `${i}th ele`);
+        derefField(newNode, struct__linkedListNode.next, NULL);
+
+        bookends = fn__linkedList__insertAtTail(bookends, newNode);
+
+        debugPrintLL(derefField(bookends, struct__linkedListBookends.headPtr));
+    }
+}
 
