@@ -283,13 +283,9 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         // have to be converted to be relative to prevNodePtr
         // instead of as an absolute memory address
         const adjustedIndex = backwardsIndex - prevNodeOffset;
-        const currNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
+        const nextNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
         
-        // update for next iteration
-        prevNodePtr = currNodePtr;
-        prevNodeOffset += backwardsIndex;
-
-        console.log(`Info: currNode at ${currNodePtr} is ${derefField(currNodePtr,struct__skipListNode.value)}`)
+        console.log(`Info: prevNode at ${prevNodePtr} is ${derefField(prevNodePtr,struct__skipListNode.value)}`)
 
         // TODO: refactor insert at end of linked list logic to its own function
         // add currNodePtr to the tail of the pointers linked list
@@ -297,7 +293,7 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         const newPointerNode = malloc(2);
 
         // link newPointerNode to end of list
-        derefField(newPointerNode, struct__skipListPointers.pointer, currNodePtr);
+        derefField(newPointerNode, struct__skipListPointers.pointer, prevNodePtr);
         derefField(newPointerNode, struct__skipListPointers.next, NULL);
 
         // have tail of linked list point to newPointerNode
@@ -309,6 +305,10 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         // update skipOrder of newBackrefs
         const prevSkipOrder = derefField(newBackrefs, struct__skipListBackrefs.order);
         derefField(newBackrefs, struct__skipListBackrefs.order, prevSkipOrder + 1);
+
+        // update for next iteration
+        prevNodePtr = nextNodePtr;
+        prevNodeOffset += backwardsIndex;
     }
 
     // we have made a dummy head for ease of coding
