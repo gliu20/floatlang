@@ -70,7 +70,8 @@ const struct__skipListNode = {
     pointers: 2 // points to head of linked list of skip pointers
 };
 
-// linked list of pointers associated with each skipListNode
+// linked list of forward pointers associated with each skipListNode
+// alternatively, can be a linked list of backward pointers
 const struct__skipListPointers = {
     pointer: 0, // points to a skipListNode
     next: 1 // points to next node in pointer linked list
@@ -81,6 +82,12 @@ const struct__skipListSkip = {
     node: 0, // the node this skip jumps to
     skipAmount: 1 // amount this skip jumps
 };
+
+// returned from findBackrefsAtIndex
+const struct__skipListBackrefs = {
+    order: 0, // allows calculating maxSkips, skipAmount etc.
+    pointers: 1 // points to head of linked list of skip pointers
+}
 
 const fn__skipList__findOptimalSkip = (pointers, skipMultiplier,
     maxSkipOrder, numSkipsAvailable, distFromDest) => {
@@ -155,4 +162,43 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
     // this means we didn't find anything or reached execution cap
     console.warn(`Warn: node at index ${index} does not exist or execution cap exceeded`);
     return NULL;
+}
+
+const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
+
+    const headPtr = derefField(skipListHeader, struct__skipListHeader.headPtr);
+    const length = derefField(skipListHeader, struct__skipListHeader.length);
+    const skipMultiplier = derefField(skipListHeader, struct__skipListHeader.skipMultiplier);
+
+    const lengthAfterInsert = length + 1;
+    const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(skipMultiplier));
+
+    // go through each depth and calculate the node right before targetIndex
+    // this is optimized b/c we cache each prevNodePtr and continue searches
+    // for lower depths from this pointer
+    let prevNodePtr = headPtr;
+    let prevNodeOffset = 0;
+
+    for (let i = depthAfterInsert; i >= 0; i--) {
+        
+        // backwards index is the absolute memory address of the node we want
+        const skipAmount = skipMultiplier ** i;
+        const backwardsOffset = index % skipAmount;
+        const backwardsIndex = index - backwardsOffset;
+
+        // because we run getIndex starting at prevNodePtr, indices
+        // have to be converted to be relative to prevNodePtr
+        // instead of as an absolute memory address
+        const adjustedIndex = backwardsIndex - prevNodeOffset;
+        const currNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
+
+        // currNodePtr should now be added to backrefs list
+        // BUT it has to be added to the tail of the linked list
+        // so that higher level skips are at the top
+
+        prevNodePtr = currNodePtr;
+        prevNodeOffset += backwardsIndex;
+
+        
+    }
 }
