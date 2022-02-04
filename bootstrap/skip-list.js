@@ -268,9 +268,9 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     
     const newBackrefs = malloc(2);
 
-    // initialize backrefsList 
+    // initialize backrefsList w/ tail and order
     derefField(newBackrefs, struct__skipListBackrefs.order, 0);
-    derefField(newBackrefs, struct__skipListBackrefs.pointers, NULL);
+    derefField(newBackrefs, struct__skipListBackrefs.pointers, backrefsTail);
 
     for (let i = depthAfterInsert; i >= 0; i--) {
         
@@ -288,6 +288,8 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         // update for next iteration
         prevNodePtr = currNodePtr;
         prevNodeOffset += backwardsIndex;
+
+        console.log(`Info: currNode at ${currNodePtr} is ${derefField(currNodePtr,struct__skipListNode.value)}`)
 
         // TODO: refactor insert at end of linked list logic to its own function
         // add currNodePtr to the tail of the pointers linked list
@@ -319,3 +321,21 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
 
     return newBackrefs;
 }
+
+function debugPrintLL(skipListBackrefs) {
+    const order = derefField(skipListBackrefs, struct__skipListBackrefs.order);
+    
+    console.log(`Info: Print list of order ${order}`);
+
+    let currNodePtr = derefField(skipListBackrefs, struct__skipListBackrefs.pointers);
+    while(currNodePtr !== NULL) {
+        const currNode = derefField(currNodePtr, struct__skipListPointers.pointer);
+
+        console.log(`Info: - ${derefField(currNode, struct__skipListNode.value)}`);
+        
+        // move on to next pointer
+        currNodePtr = derefField(currNodePtr, struct__skipListPointers.next);
+    }
+}
+
+debugPrintLL(fn__skipList__findBackrefsAtIndex(1,1));
