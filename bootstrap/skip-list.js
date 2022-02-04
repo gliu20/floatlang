@@ -103,16 +103,17 @@ const free = () => console.log("Warn: memory freeing not implemented");
 
 // dereferencing / pointer indirection
 const deref = (index, value) => {
+
     if (index <= 0 || index === null || index === NULL)
         throw new Error("Error: segmentation fault");
 
     // matches function signature <index>
     // no value supplied; we're dereferencing
-    if (this.arguments.length === 1) return memory[index];
+    if (value === undefined) return memory[index];
 
     // matches function signature <index> <value>
     // assuming dereferencing b/c no value supplied
-    if (this.arguments.length === 2) return memory[index] = value;
+    return memory[index] = value;
 }
 const derefField = (baseIndex, fieldOffset, value) => {
     const index = baseIndex + fieldOffset;
@@ -168,7 +169,7 @@ const struct__skipListBackrefs = {
 }
 
 const fn__skipList__findOptimalSkip = (pointers, skipMultiplier,
-    maxSkipOrder, numSkipsAvailable, distFromDest) => {
+    maxSkipOrder, numSkipsAvailable, distFromDest, targetIndex) => {
 
     let prevSkipPtr = pointers;
 
@@ -198,7 +199,7 @@ const fn__skipList__findOptimalSkip = (pointers, skipMultiplier,
         //   found a valid link to targetIndex. this means node does not exist
         //   or the data structure is malformed
         if (currSkipOrder === 0) {
-            console.warn(`Warn: no valid path to node at index ${index}`);
+            console.warn(`Warn: no valid path to node at index ${targetIndex}`);
             console.warn(`Warn: node either does not exist or skipList is malformed.`);
 
             const newSkip = malloc(2);
@@ -225,11 +226,11 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
 
         const maxSkipOrder = derefField(currNodePtr, struct__skipListNode.order);
         const numSkipsAvailable = maxSkipOrder + 1;
-        const distFromDest = index - i;
+        const distFromDest = targetIndex - i;
         const pointers = derefField(currNodePtr, struct__skipListNode.pointers);
 
         const optimalSkip = fn__skipList__findOptimalSkip(pointers, skipMultiplier,
-            maxSkipOrder, numSkipsAvailable, distFromDest);
+            maxSkipOrder, numSkipsAvailable, distFromDest, targetIndex);
 
         // follow skip and update i accordingly
         currNodePtr = derefField(optimalSkip, struct__skipListSkip.node);
@@ -238,7 +239,7 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
 
     // somehow we escaped the while loop without returning
     // this means we didn't find anything or reached execution cap
-    console.warn(`Warn: node at index ${index} does not exist or execution cap exceeded`);
+    console.warn(`Warn: node at index ${targetIndex} does not exist or execution cap exceeded`);
     return NULL;
 }
 
@@ -262,7 +263,6 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     let backrefsTail = malloc(2);
 
     // initialize empty tail
-    // because we insert at tail, this will become the head of the list
     derefField(backrefsTail, struct__skipListPointers.pointer, NULL);
     derefField(backrefsTail, struct__skipListPointers.next, NULL);
     
