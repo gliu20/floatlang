@@ -165,7 +165,7 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
 }
 
 const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
-
+    
     const headPtr = derefField(skipListHeader, struct__skipListHeader.headPtr);
     const length = derefField(skipListHeader, struct__skipListHeader.length);
     const skipMultiplier = derefField(skipListHeader, struct__skipListHeader.skipMultiplier);
@@ -179,26 +179,65 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     let prevNodePtr = headPtr;
     let prevNodeOffset = 0;
 
+    // TODO: figure out easy way to remove this unnecessary
+    // memory allocation that is unused
+    let backrefsTail = malloc(2);
+
+    // initialize empty tail
+    // because we insert at tail, this will become the head of the list
+    derefField(backrefsTail, struct__skipListPointers.pointer, NULL);
+    derefField(backrefsTail, struct__skipListPointers.next, NULL);
+    
+    const newBackrefs = malloc(2);
+
+    // initialize backrefsList 
+    derefField(newBackrefs, struct__skipListBackrefs.order, 0);
+    derefField(newBackrefs, struct__skipListBackrefs.pointers, NULL);
+
     for (let i = depthAfterInsert; i >= 0; i--) {
         
         // backwards index is the absolute memory address of the node we want
         const skipAmount = skipMultiplier ** i;
-        const backwardsOffset = index % skipAmount;
-        const backwardsIndex = index - backwardsOffset;
+        const backwardsOffset = targetIndex % skipAmount;
+        const backwardsIndex = targetIndex - backwardsOffset;
 
         // because we run getIndex starting at prevNodePtr, indices
         // have to be converted to be relative to prevNodePtr
         // instead of as an absolute memory address
         const adjustedIndex = backwardsIndex - prevNodeOffset;
         const currNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
-
-        // currNodePtr should now be added to backrefs list
-        // BUT it has to be added to the tail of the linked list
-        // so that higher level skips are at the top
-
+        
+        // update for next iteration
         prevNodePtr = currNodePtr;
         prevNodeOffset += backwardsIndex;
 
+        // TODO: refactor insert at end of linked list logic to its own function
+        // add currNodePtr to the tail of the pointers linked list
+        // so that higher level skips are at the top
+        const newPointerNode = malloc(2);
+
+        // link newPointerNode to end of list
+        derefField(newPointerNode, struct__skipListPointers.pointer, currNodePtr);
+        derefField(newPointerNode, struct__skipListPointers.next, NULL);
+
+        // have tail of linked list point to newPointerNode
+        derefField(backrefsTail, struct__skipListPointers.next, newPointerNode);
         
+        // tail is now newPointerNode
+        backrefsTail = newPointerNode;     
+        
+        // update skipOrder of newBackrefs
+        const prevSkipOrder = derefField(newBackrefs, struct__skipListBackrefs.order);
+        derefField(newBackrefs, struct__skipListBackrefs.order, prevSkipOrder + 1);
     }
+
+    // we have made a dummy head for ease of coding
+    // but now we have to remove it
+    const dummyHead = derefField(newBackrefs, struct__skipListBackrefs.pointers);
+    const realHead = derefField(dummyHead, struct__skipListPointers.next);
+
+    // point to real head
+    derefField(newBackrefs, struct__skipListBackrefs.pointers, realHead);
+
+    return newBackrefs;
 }
