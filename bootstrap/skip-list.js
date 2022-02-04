@@ -243,6 +243,9 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
     return NULL;
 }
 
+
+// TODO debug this
+// probably something to do with incorrect skipOrder that has to be skipped
 const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     
     const headPtr = derefField(skipListHeader, struct__skipListHeader.headPtr);
@@ -285,7 +288,7 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         const adjustedIndex = backwardsIndex - prevNodeOffset;
         const nextNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
         
-        console.log(`Info: prevNode at ${prevNodePtr} is ${derefField(prevNodePtr,struct__skipListNode.value)}`)
+        console.log(`Info: prevNode at ${backwardsIndex} is ${derefField(prevNodePtr,struct__skipListNode.value)}`)
 
         // TODO: refactor insert at end of linked list logic to its own function
         // add currNodePtr to the tail of the pointers linked list
@@ -311,6 +314,7 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
         prevNodeOffset += backwardsIndex;
     }
 
+
     // we have made a dummy head for ease of coding
     // but now we have to remove it
     const dummyHead = derefField(newBackrefs, struct__skipListBackrefs.pointers);
@@ -319,23 +323,26 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     // point to real head
     derefField(newBackrefs, struct__skipListBackrefs.pointers, realHead);
 
+    debugPrintLL(newBackrefs);
+
     return newBackrefs;
 }
 
-function debugPrintLL(skipListBackrefs) {
+function debugPrintLL(skipListBackrefs, msg) {
     const order = derefField(skipListBackrefs, struct__skipListBackrefs.order);
-    
-    console.log(`Info: Print list of order ${order}`);
+    let output = `Info: ${msg || ""}LinkedList(${order}): `;
 
     let currNodePtr = derefField(skipListBackrefs, struct__skipListBackrefs.pointers);
     while(currNodePtr !== NULL) {
         const currNode = derefField(currNodePtr, struct__skipListPointers.pointer);
 
-        console.log(`Info: - ${derefField(currNode, struct__skipListNode.value)}`);
+        output += `${derefField(currNode, struct__skipListNode.value)} --> `;
         
         // move on to next pointer
         currNodePtr = derefField(currNodePtr, struct__skipListPointers.next);
     }
+    output += "NULL";
+    console.log(output);
 }
 
-debugPrintLL(fn__skipList__findBackrefsAtIndex(1,1));
+fn__skipList__findBackrefsAtIndex(1,1)
