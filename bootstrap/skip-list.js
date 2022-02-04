@@ -130,6 +130,47 @@ const derefField = (baseIndex, fieldOffset, value) => {
     return deref(index, value);
 }
 
+
+//// LINKED LIST ////
+// a single node in linked list
+const struct__linkedListNode = {
+    value: 0,
+    next: 1
+};
+
+const struct__linkedListBookends = {
+    headPtr: 0,
+    tailPtr: 1
+};
+
+const fn__linkedList__insertAtTail = (currBookends, nodePtr) => {
+
+    const currHeadPtr = derefField(currBookends, struct__linkedListBookends.headPtr);
+    const currTailPtr = derefField(currBookends, struct__linkedListBookends.tailPtr);
+
+    const newBookends = malloc(2);
+
+    // nodePtr is the new tail so make nodePtr point to NULL and
+    // set tailPtr to nodePtr 
+    derefField(nodePtr, struct__linkedListNode.next, NULL);
+    derefField(newBookends, struct__linkedListBookends.tailPtr, nodePtr);
+
+    if (currTailPtr === NULL) {
+        // tail does not exist so the head is nodePtr
+        derefField(newBookends, struct__linkedListBookends.headPtr, nodePtr);
+
+        return newBookends;
+    }
+
+    // make current tail point to nodePtr which is the new tail
+    derefField(currTailPtr, struct__linkedListNode.next, nodePtr);
+
+    // head is unchanged so we keep it as is
+    derefField(newBookends, struct__linkedListBookends.headPtr, currHeadPtr);
+
+    return newBookends;
+}
+
 //// SKIP LIST ////
 // temporarily set for debugging to prevent hangs
 const EXECUTION_CAP = 100;
@@ -346,3 +387,5 @@ function debugPrintLL(skipListBackrefs, msg) {
 }
 
 fn__skipList__findBackrefsAtIndex(1,1)
+
+
