@@ -284,7 +284,24 @@ const fn__skipList__getAtIndex = (skipListHeader, nodePtr, targetIndex) => {
     return NULL;
 }
 
+const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
+    const headPtr = derefField(skipListHeader, struct__skipListHeader.headPtr);
+    const length = derefField(skipListHeader, struct__skipListHeader.length);
+    const skipMultiplier = derefField(skipListHeader, struct__skipListHeader.skipMultiplier);
 
+    const lengthAfterInsert = length + 1;
+    const depthAfterInsert = Math.floor(Math.log(lengthAfterInsert) / Math.log(skipMultiplier));
+
+    // go through each depth and calculate the node right before targetIndex
+    // this is optimized b/c we cache each prevNodePtr and continue searches
+    // for lower depths from this pointer
+    let prevNodePtr = headPtr;
+    let prevNodeOffset = 0;
+
+
+}
+
+/*
 // TODO debug this
 // probably something to do with incorrect skipOrder that has to be skipped
 const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
@@ -367,18 +384,18 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     debugPrintSL(newBackrefs);
 
     return newBackrefs;
-}
+}*/
 
 function debugPrintSL(skipListBackrefs, msg) {
     const order = derefField(skipListBackrefs, struct__skipListBackrefs.order);
     let output = `Info: ${msg || ""}LinkedList(${order}): `;
 
     let currNodePtr = derefField(skipListBackrefs, struct__skipListBackrefs.pointers);
-    while(currNodePtr !== NULL) {
+    while (currNodePtr !== NULL) {
         const currNode = derefField(currNodePtr, struct__skipListPointers.pointer);
 
         output += `${derefField(currNode, struct__skipListNode.value)} --> `;
-        
+
         // move on to next pointer
         currNodePtr = derefField(currNodePtr, struct__skipListPointers.next);
     }
@@ -390,7 +407,7 @@ function debugPrintLL(headPtr, msg) {
     let output = `Info: ${msg || ""}LinkedList: `;
 
     let currNodePtr = headPtr;
-    while(currNodePtr !== NULL) {
+    while (currNodePtr !== NULL) {
         const value = derefField(currNodePtr, struct__linkedListNode.value);
 
         output += `${value} --> `;
@@ -400,7 +417,7 @@ function debugPrintLL(headPtr, msg) {
     console.log(output);
 }
 
-function testLL () {
+function testLL() {
     let bookends = malloc(2);
 
     derefField(bookends, struct__linkedListBookends.headPtr, NULL);
