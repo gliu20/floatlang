@@ -298,6 +298,69 @@ const fn__skipList__findBackrefsAtIndex = (skipListHeader, targetIndex) => {
     let prevNodePtr = headPtr;
     let prevNodeOffset = 0;
 
+    // this is the linked list header definition
+    // we will chop off the header when we store it as part of the
+    // backrefs struct
+    let bookends = malloc(2);
+    let order = 0;
+
+    derefField(bookends, struct__linkedListBookends.headPtr, NULL);
+    derefField(bookends, struct__linkedListBookends.tailPtr, NULL);
+
+    // we start with the biggest skips because those start earlier
+    // in a skip pointer list but, more importantly, they allow us to
+    // cache the prevNodePtr and continue searches from this pointer
+    // stopping us from needing to traverse the entire skipList.
+    //
+    // what we do is find item with skipAmount that points to our
+    // desired element
+
+    for (let i = depthAfterInsert; i >= 0; i--) {
+        // backwards index is the absolute memory address of the node we want
+        // we also adjust to make sure it is non-negative
+        const skipAmount = skipMultiplier ** i;
+        const backwardsOffset = (targetIndex - 1) % skipAmount;
+        const backwardsIndex = Math.max((targetIndex - 1) - backwardsOffset, 0);
+
+        // because we run getIndex starting at prevNodePtr, indices
+        // have to be converted to be relative to prevNodePtr
+        // instead of as an absolute memory address
+        const adjustedIndex = backwardsIndex - prevNodeOffset;
+
+        if (adjustedIndex < 0) throw new Error("Error: expected adjustedIndex to be non-negative");
+
+        const nextNodePtr = fn__skipList__getAtIndex(skipListHeader, prevNodePtr, adjustedIndex);
+        
+        // TODO: consider for performance improvements
+        // CONTEXT:
+        //   nextNodePtr should have a skipPointer at depth i
+        //   and that's the pointer that points to the targetIndex
+        //   this is the one that should be updated, but we're not doing
+        //   this update in this function; however, it might be considered
+        //   to do something here for performance
+
+        // add node to skipPointerList
+        const newNode = malloc(2);
+
+        derefField(newNode, struct__skipListPointers.pointer, nextNodePtr);
+        derefField(newNode, struct__skipListPointers.next, NULL);
+
+        bookends = fn__linkedList__insertAtTail(bookends, newNode);
+        order++;
+
+        // update for next iteration
+        prevNodePtr = nextNodePtr;
+        prevNodeOffset += backwardsIndex;
+    }
+
+    // now we have to create the backrefs struct
+    const skipPointerListHead = derefField(bookends, struct__linkedListBookends.headPtr);
+    const backrefs = malloc(2);
+
+    derefField(backrefs, struct__skipListBackrefs.order, order);
+    derefField(backrefs, struct__skipListBackrefs.pointers, skipPointerListHead);
+
+    return backrefs;
 
 }
 
