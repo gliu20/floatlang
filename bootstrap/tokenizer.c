@@ -46,18 +46,17 @@ bool pushCharToken(struct token *tokens, char *tokenStartIndex, char *tokenEndIn
 
 // TODO add return for token struct
 // TODO we're going to need a linkedlist for tokens
-int tokenize(char *str)
+int tokenize(char str[])
 {
     // TODO
     int tokens = malloc(1);
 
     unsigned int lineNum = 1;
     unsigned int colNum = 1;
-    char *currPartialToken = "";
+    unsigned int currPartialTokenIndex = 0;
 
-    // make sure all tokens are pushed out
-    str += '\n';
-    
+    char currPartialToken[MAX_TOKEN_SIZE] = "";
+
     const len = strlen(str);
 
     for (unsigned int i = 0; i < len; i++)
@@ -66,6 +65,9 @@ int tokenize(char *str)
 
         switch (currChar)
         {
+        // strings are null terminated so we treat that
+        // as a newline to force all tokens out
+        case '\0':
         case '\n':
             pushToken();
             pushChar(currChar);
@@ -73,22 +75,22 @@ int tokenize(char *str)
             // update line and column nums
             lineNum++;
             colNum = 0;
-            currPartialToken = "";
 
+            clearCurrPartialToken();
             break;
         case ' ':
         case '\t':
             pushToken();
-            currPartialToken = "";
+            clearCurrPartialToken();
             break;
         CASE_NON_ALPHANUM:
             pushToken();
             pushChar(currChar);
-            currPartialToken = "";
+            clearCurrPartialToken();
 
             break;
         CASE_ALPHANUM:
-            currPartialToken += currChar;
+            currPartialToken[++currPartialTokenIndex] = currChar;
             break;
         default:
             error("Invalid char '%c' [%i:%i]", currChar, lineNum, colNum);

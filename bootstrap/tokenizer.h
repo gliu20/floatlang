@@ -96,6 +96,12 @@
     case 'y':         \
     case 'z'
 
+#define MAX_TOKEN_SIZE 256
+
+#define clearCurrPartialToken() \
+    currPartialToken[0] = '\0'; \
+    currPartialTokenIndex = 0;
+
 struct token
 {
     char *tokenStartIndex;
