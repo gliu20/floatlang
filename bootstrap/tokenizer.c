@@ -70,7 +70,7 @@ int tokenize(char str[])
         case '\0':
         case '\n':
             pushToken();
-            pushChar(currChar);
+            pushCharToken(currChar);
 
             // update line and column nums
             lineNum++;
@@ -85,7 +85,7 @@ int tokenize(char str[])
             break;
         CASE_NON_ALPHANUM:
             pushToken();
-            pushChar(currChar);
+            pushCharToken(currChar);
             clearCurrPartialToken();
 
             break;
