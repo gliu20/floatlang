@@ -101,3 +101,38 @@ fn name (const carrier return_type) = () => {
 }
 ```
 
+
+
+## Syntax
+A program is a series of statements
+
+### Constructs
+Constructs are a special type of statement. Constructs are the building blocks 
+for control flow, like for, while, functions, switch, and if-else statements
+```
+CONSTRUCT
+
+KEYWORD OPTIONAL_TYPE OPTIONAL_IDENTIFIER OPTIONAL_(MODIFIERS) STATEMENT_BLOCK
+```
+
+### Assignment
+This is a special statement that creates a variable and optionally initializes it to a value
+```
+KEYWORD OPTIONAL_TYPE IDENTIFIER OPTIONAL_= OPTIONAL_VALUE
+```
+
+KEYWORDS = {
+    // control flow
+    "for",
+    "while",
+    "switch",
+    "if",
+    "else",
+
+    // functions
+    "fn",
+
+    // assignment
+    "let",
+    "const",
+}
