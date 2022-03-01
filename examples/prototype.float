@@ -1,0 +1,19 @@
+// loads dependencies
+include blah blah
+
+// defines implementations for what we want to do
+impl for
+
+end
+
+// declares the behaviour of the program w/o
+// actually specifying the implementation
+declare
+
+end
+
+// declares the larger components of the program
+// and how data flows from one another
+model
+
+end
