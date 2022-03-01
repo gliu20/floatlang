@@ -7,5 +7,6 @@ struct linkedlist_head {
 };
 
 struct linkedlist_node {
+    struct linkedlist_node *prev;
     struct linkedlist_node *next;
 };
