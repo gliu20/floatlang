@@ -9,7 +9,7 @@ language with optional JIT-optimizing capabilities
     - hash tables
     - structs
 - data polymorphism: carrier/cargo
-- strategy pattern: decl/impl/do
+- strategy pattern: decl/do/impl/action
     - separates declaration of behavior from the implementation of 
       that behaviour
     - impure functions can only be run in the implement block
