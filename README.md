@@ -1,17 +1,20 @@
 # floatlang | ece project
-A no garbage programming language with a stack and a tree-based heap
+An ahead-of-time compiled, declarative, no-garbage programming
+language with optional JIT-optimizing capabilities
 
-- custom data structure = skip list?
-- carriers
-- function slots?
-- everything pure by design
-- explicitly declare side effects
-- borrowing / some sort of garbage collecting scheme
+- built-in data structs
+    - skip lists
+    - doubly linked lists
+    - dynamic arrays
+    - hash tables
+    - structs
+- data polymorphism: carrier/cargo
+- strategy pattern: decl/impl/do
+    - separates declaration of behavior from the implementation of 
+      that behaviour
+    - impure functions can only be run in the implement block
+- ownership/borrowing for maintaining heap
 - model-based language?
-
-
-source to source compiler --> compiles down to c that can then be compiled to machine code
-
 
 # Documentation
 ## Operations
