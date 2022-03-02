@@ -27,3 +27,8 @@ _start:
 
 # indexed addressing mode
 # beginning_address(,$index_register,word_size)
+
+
+# ADDRESS_OR_OFFSET(%BASE_OR_OFFSET,%INDEX,MULTIPLIER)
+# FINAL ADDRESS = ADDRESS_OR_OFFSET + %BASE_OR_OFFSET + MULTIPLIER * %INDEX
+
