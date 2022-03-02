@@ -14,14 +14,17 @@
 .globl my_function
 
 _start:
+    # before calling, stack pointer %RSP must be 16 byte aligned
     call my_function
 
+
+# reference: https://cs.lmu.edu/~ray/notes/gasexamples/
 my_function: 
     # CALLEE PROLOGUE
-    pushl %ebp          # saves old base pointer which can be anything;
+    pushq %rbp          # saves old base pointer which can be anything;
                         # it might be something that a function was previously
                         # using so we have to save it
-    movl %esp, %ebp     # copies stack pointer to base pointer
+    movq %rsp, %rbp     # copies stack pointer to base pointer
 
     # now base pointer to top of stack
     # underneath the stack is all of the params
@@ -30,7 +33,7 @@ my_function:
 
     # CALLEE BODY
     # reserve space for local variables
-    subl $8, %esp       # don't have to worry about pushes and pops
+    subq $8, %rsp       # don't have to worry about pushes and pops
                         # remember that the stack grows from the bottom
                         # (where memory addresses are highest)
 
@@ -40,7 +43,7 @@ my_function:
 
     # CALLEE EPILOGUE
     # when CALLEE function is done, store result in %eax
-    movl %ebp, %esp     # recovers stack pointer to original value
+    movq %rbp, %rsp     # recovers stack pointer to original value
                         # thus de allocating everything in current stack frame
-    popl %ebp           # restore caller's base pointer if they used it
+    popq %rbp           # restore caller's base pointer if they used it
     ret                 # return control back to caller
