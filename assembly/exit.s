@@ -14,9 +14,9 @@
 .globl _start
 
 _start:
-    movl $1, %eax        # linux syscall for exit
-    movl $0, %ebx       # exit code
-    int $0x80
+    movq $60, %rax        # linux syscall for exit
+    movq $10, %rdi       # exit code
+    syscall
 
 
 # types
