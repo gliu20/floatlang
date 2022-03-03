@@ -23,10 +23,11 @@ const tokenize = (str) => {
 
     // make sure all tokens are pushed out
     str += "\n";
-
+    let prevChar = -1;
+    let nextChar = -1;
     for (let i = 0; i < str.length; i++) {
         const currChar = str.charAt(i);
-
+        nextChar = str.charAt(i + 1) || -1;
 
         switch (currChar) {
             case "\n":
@@ -45,6 +46,9 @@ const tokenize = (str) => {
                 currPartialToken = "";
                 break;
 
+            // TODO consider splitting out ()[]{} into separate
+            // cases since they should separate from the others
+            // as separate tokens
             case "!": case "\"": case "#": case "$": case "%":
             case "&": case "'": case "(": case ")": case "*":
             case "+": case ",": case "-": case ".": case "/":
@@ -52,10 +56,39 @@ const tokenize = (str) => {
             case "?": case "@": case "[": case "\\": case "]":
             case "^": case "_": case "`": case "{": case "|":
             case "}":
+                // prevChar or nextChar is a special char ;
+                // this means that the token will be continued
+                // so we just keep adding to the token
+                if (prevChar == "!" || prevChar == "\"" || prevChar == "#" ||
+                    prevChar == "$" || prevChar == "%" || prevChar == "&" ||
+                    prevChar == "'" || prevChar == "(" || prevChar == ")" ||
+                    prevChar == "*" || prevChar == "+" || prevChar == "," ||
+                    prevChar == "-" || prevChar == "." || prevChar == "/" ||
+                    prevChar == ":" || prevChar == ";" || prevChar == "<" ||
+                    prevChar == "=" || prevChar == ">" || prevChar == "?" ||
+                    prevChar == "@" || prevChar == "[" || prevChar == "\\" ||
+                    prevChar == "]" || prevChar == "^" || prevChar == "_" ||
+                    prevChar == "`" || prevChar == "{" || prevChar == "|" ||
+                    prevChar == "}" ||
 
-                pushToken();
-                pushChar(currChar);
-                currPartialToken = "";
+                    nextChar == "!" || nextChar == "\"" || nextChar == "#" ||
+                    nextChar == "$" || nextChar == "%" || nextChar == "&" ||
+                    nextChar == "'" || nextChar == "(" || nextChar == ")" ||
+                    nextChar == "*" || nextChar == "+" || nextChar == "," ||
+                    nextChar == "-" || nextChar == "." || nextChar == "/" ||
+                    nextChar == ":" || nextChar == ";" || nextChar == "<" ||
+                    nextChar == "=" || nextChar == ">" || nextChar == "?" ||
+                    nextChar == "@" || nextChar == "[" || nextChar == "\\" ||
+                    nextChar == "]" || nextChar == "^" || nextChar == "_" ||
+                    nextChar == "`" || nextChar == "{" || nextChar == "|" ||
+                    nextChar == "}") {
+                    currPartialToken += currChar;
+                }
+                else {
+                    pushToken();
+                    pushChar(currChar);
+                    currPartialToken = "";
+                }
 
                 break;
             // nums
@@ -82,6 +115,8 @@ const tokenize = (str) => {
             default:
                 throw new Error(`Invalid char '${currChar}' [${lineNumber}:${columnNumber}]`);
         }
+
+        prevChar = currChar;
 
         columnNumber++;
 

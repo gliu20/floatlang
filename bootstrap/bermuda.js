@@ -37,5 +37,5 @@ const KEYWORD_COUNT = counter();
 
 const compileBermudaProgram = (program) => {
     const tokens = tokenize(program);
-    const lexedTokens = bermudaLex(tokens);
+    const lexedTokens = lex(tokens, lexicalDescription);
 }
