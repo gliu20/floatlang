@@ -15,6 +15,10 @@ const bermudaLexDescription = {
             isToken: (token) => /(^0[box][0-9a-f]+$|^[0-9]+$)/i.test(token)
         },
         {
+            name: "COMMENT_START",
+            isToken: (token) => /^\/\/$/i.test(token)
+        },
+        {
             name: "IDENTIFIER",
             isToken: (token) => /^[a-z_][a-z_0-8]*$/i.test(token)
         },

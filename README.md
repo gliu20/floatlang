@@ -13,6 +13,7 @@ language with optional JIT-optimizing capabilities
     - separates declaration of behavior from the implementation of 
       that behaviour
     - impure functions can only be run in the implement block
+    - somehow need to declare abstraction level
 - ownership/borrowing for maintaining heap
 - model-based language?
 
