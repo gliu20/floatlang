@@ -259,6 +259,9 @@ const enterModeByCharType = (state, context) =>
 const enterDefaultMode = (state) =>
     state.mode = MODE_DEFAULT;
 
+const enterQuoteMode = (state) =>
+    state.mode = MODE_QUOTE;
+
 const buildTokenUsingStrategy__enter_mode = (state, context) => {
     let result = [];
 
@@ -303,7 +306,7 @@ const extendAndMaybeEmitToken__escape = (state, context) => {
         if (escapeToken) result.push(escapeToken);
 
         clearCurrPartialToken(state);
-        enterDefaultMode(state);
+        enterQuoteMode(state);
     }
 
     bookkeepNewCol(state);
@@ -347,8 +350,32 @@ const extendAndMaybeEmitToken__comment = (state, context) => {
     }
 
     return result;
-};;
-const extendAndMaybeEmitToken__quote = console.log;
+};
+const extendAndMaybeEmitToken__quote = (state, context) => {
+    let result = [];
+    const { currChar, nextChar } = context;
+    const currCharType = charTypeOf(context.currChar);
+    const nextCharType = charTypeOf(context.nextChar);
+    const quoteType = charTypeOf(state.currPartialToken.charAt(0));
+
+    if (quoteType === currCharType) {
+        const quoteToken = emitTokenWithCurrChar(state, context);
+        if (quoteToken) result.push(quoteToken);
+
+        clearCurrPartialToken(state);
+        bookkeepNewCol(state);
+        enterDefaultMode(state);
+    }
+    else if (currChar === "\\") {
+        // TODO
+    }
+    else {
+        extendTokenWithCurrChar(state, context);
+        bookkeepNewCol(state);
+    }
+
+    return result;
+};
 
 const MODE_HANDLERS = [
     extendAndMaybeEmitToken__default,   // MODE_DEFAULT
